@@ -34,13 +34,13 @@ class Snowflake {
     reset() {
         this.x = Math.random() * canvas.width;
         this.y = -10;
-        this.speed = Math.random() * 2 + 1;
+        this.speed = (Math.random() * 2 + 1) * 60; // 픽셀/초 (60~180)
         this.size = Math.floor(Math.random() * 2) + 1;
     }
 
-    update() {
-        this.y += this.speed;
-        this.x += Math.sin(this.y / 30) * 0.5;
+    update(deltaTime) {
+        this.y += this.speed * deltaTime;
+        this.x += Math.sin(this.y / 30) * 0.5 * 60 * deltaTime;
 
         if (this.y > canvas.height) {
             this.reset();
@@ -65,7 +65,7 @@ class Light {
         this.y = y;
         this.color = this.randomColor();
         this.brightness = Math.random() * 0.6 + 0.3; // 0.3 ~ 0.9 사이로 초기화
-        this.speed = (Math.random() * 0.02 + 0.01) / 2; // 속도를 절반으로 (유지 시간 두 배)
+        this.speed = (Math.random() * 0.02 + 0.01) / 2 * 60; // 단위/초 (0.3~0.9)
     }
 
     randomColor() {
@@ -73,8 +73,8 @@ class Light {
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    update() {
-        this.brightness += this.speed;
+    update(deltaTime) {
+        this.brightness += this.speed * deltaTime;
         // 0.2 ~ 1.0 범위 내에서만 움직이도록 제한
         if (this.brightness > 1.0) {
             this.brightness = 1.0;
@@ -99,10 +99,10 @@ class Gift {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.speed = 2;
+        this.speed = 2 * 60; // 픽셀/초 (120)
         this.color = this.randomColor();
         this.rotation = 0;
-        this.rotationSpeed = (Math.random() - 0.5) * 0.1; // -0.05 ~ 0.05
+        this.rotationSpeed = (Math.random() - 0.5) * 0.1 * 60; // 라디안/초
 
         // 지면 경계(118)부터 적당한 깊이(130) 사이의 랜덤한 위치에서 터짐
         this.explodeY = (118 + Math.random() * 12) * PIXEL_SIZE;
@@ -113,9 +113,9 @@ class Gift {
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    update() {
-        this.y += this.speed;
-        this.rotation += this.rotationSpeed;
+    update(deltaTime) {
+        this.y += this.speed * deltaTime;
+        this.rotation += this.rotationSpeed * deltaTime;
 
         // 랜덤하게 설정된 위치에 도달하면 터짐
         if (this.y >= this.explodeY) {
@@ -163,13 +163,13 @@ class Particle {
 
         // 랜덤한 방향으로 퍼짐
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 3 + 1;
+        const speed = (Math.random() * 3 + 1) * 60; // 픽셀/초 (60~240)
         this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed - 2; // 위쪽으로 더 많이
+        this.vy = Math.sin(angle) * speed - 2 * 60; // 위쪽으로 더 많이
 
-        this.gravity = 0.15;
+        this.gravity = 0.15 * 60 * 60; // 픽셀/초^2 (540)
         this.life = 1.0; // 1.0에서 시작해서 0으로
-        this.fadeSpeed = 0.02;
+        this.fadeSpeed = 0.02 * 60; // 단위/초 (1.2)
 
         // 크리스마스 색상
         const colors = [COLORS.red, COLORS.yellow, COLORS.snow, COLORS.star, COLORS.orange];
@@ -178,12 +178,12 @@ class Particle {
         this.size = Math.random() > 0.5 ? 1 : 2; // 1픽셀 또는 2픽셀
     }
 
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += this.gravity; // 중력 적용
+    update(deltaTime) {
+        this.x += this.vx * deltaTime;
+        this.y += this.vy * deltaTime;
+        this.vy += this.gravity * deltaTime; // 중력 적용
 
-        this.life -= this.fadeSpeed;
+        this.life -= this.fadeSpeed * deltaTime;
 
         return this.life <= 0; // life가 0 이하면 제거
     }
@@ -207,7 +207,7 @@ class Firework {
         this.x = (Math.random() * 150 + 25) * PIXEL_SIZE; // 양 끝 제외한 랜덤 위치
         this.y = 118 * PIXEL_SIZE; // 지면에서 시작
         this.targetY = (Math.random() * 40 + 20) * PIXEL_SIZE; // 20~60 사이 높이
-        this.speed = 3;
+        this.speed = 3 * 60; // 픽셀/초 (180)
         this.exploded = false;
 
         // 폭죽 색상 (폭발할 때 사용)
@@ -221,9 +221,9 @@ class Firework {
         this.colorSet = colorSets[Math.floor(Math.random() * colorSets.length)];
     }
 
-    update() {
+    update(deltaTime) {
         if (!this.exploded) {
-            this.y -= this.speed;
+            this.y -= this.speed * deltaTime;
 
             // 목표 높이에 도달하면 폭발
             if (this.y <= this.targetY) {
@@ -267,25 +267,29 @@ class FireworkParticle {
 
         // 360도 모든 방향으로 퍼짐
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 3 + 2; // 더 빠르게 (2~5 범위)
+        const speed = (Math.random() * 3 + 2) * 60; // 픽셀/초 (120~300)
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
 
-        this.gravity = 0.08; // 선물 파티클보다 가벼움
+        this.gravity = 0.08 * 60 * 60; // 픽셀/초^2 (288)
         this.life = 1.0;
-        this.fadeSpeed = 0.012; // 더 오래 유지 (더 멀리 가도록)
+        this.fadeSpeed = 0.012 * 60; // 단위/초 (0.72)
+        this.airResistance = 0.98; // 프레임당 저항
 
         this.color = color;
         this.size = Math.random() > 0.7 ? 2 : 1;
     }
 
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += this.gravity;
-        this.vx *= 0.98; // 공기 저항
+    update(deltaTime) {
+        this.x += this.vx * deltaTime;
+        this.y += this.vy * deltaTime;
+        this.vy += this.gravity * deltaTime;
 
-        this.life -= this.fadeSpeed;
+        // 공기 저항 (deltaTime 보정)
+        const resistance = Math.pow(this.airResistance, deltaTime * 60);
+        this.vx *= resistance;
+
+        this.life -= this.fadeSpeed * deltaTime;
 
         return this.life <= 0;
     }
@@ -1062,8 +1066,15 @@ function createFirework() {
     }
 }
 
-// 애니메이션 루프
-function animate() {
+// 애니메이션 루프 (deltaTime 기반)
+let lastTime = 0;
+
+function animate(currentTime = 0) {
+    // deltaTime 계산 (초 단위)
+    // 첫 프레임이나 너무 큰 deltaTime은 1/60초로 제한 (60fps 기준)
+    const deltaTime = lastTime === 0 ? 1/60 : Math.min((currentTime - lastTime) / 1000, 0.1);
+    lastTime = currentTime;
+
     // 배경 클리어
     ctx.fillStyle = COLORS.darkBlue;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1087,7 +1098,7 @@ function animate() {
 
     // 조명 업데이트 및 그리기
     lights.forEach(light => {
-        light.update();
+        light.update(deltaTime);
         light.draw();
     });
 
@@ -1096,7 +1107,7 @@ function animate() {
 
     // 산타와 루돌프 썰매 이동 (왼쪽에서 오른쪽으로)
     prevSantaX = santaX;
-    santaX += 0.5;
+    santaX += 30 * deltaTime; // 픽셀/초 (30)
 
     // 리셋 조건: 배너가 활성화되어 있으면 배너가 완전히 사라질 때까지 기다림
     let shouldReset = false;
@@ -1130,14 +1141,14 @@ function animate() {
 
     // 눈송이 업데이트 및 그리기
     snowflakes.forEach(snowflake => {
-        snowflake.update();
+        snowflake.update(deltaTime);
         snowflake.draw();
     });
 
     // 떨어지는 선물 업데이트 및 그리기
     for (let i = fallingGifts.length - 1; i >= 0; i--) {
         const gift = fallingGifts[i];
-        const shouldRemove = gift.update();
+        const shouldRemove = gift.update(deltaTime);
 
         if (shouldRemove) {
             // 선물이 터진 횟수 증가
@@ -1168,7 +1179,7 @@ function animate() {
     // 파티클 업데이트 및 그리기
     for (let i = particles.length - 1; i >= 0; i--) {
         const particle = particles[i];
-        const shouldRemove = particle.update();
+        const shouldRemove = particle.update(deltaTime);
 
         if (shouldRemove) {
             particles.splice(i, 1);
@@ -1183,7 +1194,7 @@ function animate() {
     // 폭죽 로켓 업데이트 및 그리기
     for (let i = fireworks.length - 1; i >= 0; i--) {
         const firework = fireworks[i];
-        const status = firework.update();
+        const status = firework.update(deltaTime);
 
         if (status === 'explode') {
             // 폭발 시 파티클 생성 (50-70개)
@@ -1203,7 +1214,7 @@ function animate() {
     // 폭죽 파티클 업데이트 및 그리기
     for (let i = fireworkParticles.length - 1; i >= 0; i--) {
         const particle = fireworkParticles[i];
-        const shouldRemove = particle.update();
+        const shouldRemove = particle.update(deltaTime);
 
         if (shouldRemove) {
             fireworkParticles.splice(i, 1);
