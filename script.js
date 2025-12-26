@@ -278,9 +278,21 @@ class FireworkParticle {
 
         this.color = color;
         this.size = Math.random() > 0.7 ? 2 : 1;
+
+        // 트레일(잔상) 효과를 위한 경로 기록
+        this.trail = [];
+        this.maxTrailLength = 15; // 최대 15개 포인트
     }
 
     update(deltaTime) {
+        // 현재 위치를 트레일에 추가 (업데이트 전)
+        this.trail.push({ x: this.x, y: this.y });
+
+        // 트레일 길이 제한
+        if (this.trail.length > this.maxTrailLength) {
+            this.trail.shift(); // 가장 오래된 것 제거
+        }
+
         this.x += this.vx * deltaTime;
         this.y += this.vy * deltaTime;
         this.vy += this.gravity * deltaTime;
@@ -295,6 +307,23 @@ class FireworkParticle {
     }
 
     draw() {
+        // 트레일(잔상) 그리기 - 오래된 것일수록 투명하게
+        for (let i = 0; i < this.trail.length; i++) {
+            const point = this.trail[i];
+            // 트레일의 투명도: 가장 오래된 것은 거의 투명, 최신은 현재 life에 가까움
+            const trailAlpha = (i / this.trail.length) * this.life * 0.6; // 최대 60%
+
+            ctx.globalAlpha = trailAlpha;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(
+                Math.floor(point.x / PIXEL_SIZE) * PIXEL_SIZE,
+                Math.floor(point.y / PIXEL_SIZE) * PIXEL_SIZE,
+                this.size * PIXEL_SIZE,
+                this.size * PIXEL_SIZE
+            );
+        }
+
+        // 현재 위치 그리기 (가장 밝게)
         ctx.globalAlpha = this.life;
         ctx.fillStyle = this.color;
         ctx.fillRect(
