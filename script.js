@@ -676,11 +676,12 @@ function drawSantaOnSleigh(x, y) {
 // 배너 패널 그리기 (산타 썰매 뒤)
 function drawBanner(x, y) {
     const bannerX = x - 80;
-    const bannerY = y + 3;
+    const bannerY = y;
     const bannerWidth = 55;
+    const bannerHeight = 16;
 
     // 배너 배경 (흰색)
-    for (let j = 0; j < 10; j++) {
+    for (let j = 0; j < bannerHeight; j++) {
         for (let i = 0; i < bannerWidth; i++) {
             drawPixel(bannerX + i, bannerY + j, COLORS.snow);
         }
@@ -689,27 +690,27 @@ function drawBanner(x, y) {
     // 배너 테두리 (빨간색)
     for (let i = 0; i < bannerWidth; i++) {
         drawPixel(bannerX + i, bannerY, COLORS.red);
-        drawPixel(bannerX + i, bannerY + 9, COLORS.red);
+        drawPixel(bannerX + i, bannerY + bannerHeight - 1, COLORS.red);
     }
-    for (let j = 0; j < 10; j++) {
+    for (let j = 0; j < bannerHeight; j++) {
         drawPixel(bannerX, bannerY + j, COLORS.red);
         drawPixel(bannerX + bannerWidth - 1, bannerY + j, COLORS.red);
     }
 
     // 배너와 썰매를 연결하는 줄
     for (let i = 0; i < 8; i++) {
-        drawPixel(bannerX + bannerWidth + i, bannerY + 5, '#8B4513');
+        drawPixel(bannerX + bannerWidth + i, bannerY + 8, '#8B4513');
     }
 
     // "태은이 국시 합격 기원" 텍스트 렌더링
     ctx.save();
-    ctx.font = 'bold 14px Arial, sans-serif';
+    ctx.font = 'bold 20px Arial, sans-serif';
     ctx.fillStyle = COLORS.red;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('태은이 국시 합격 기원',
         (bannerX + bannerWidth / 2) * PIXEL_SIZE,
-        (bannerY + 5) * PIXEL_SIZE
+        (bannerY + bannerHeight / 2) * PIXEL_SIZE
     );
     ctx.restore();
 }

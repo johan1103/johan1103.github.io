@@ -230,7 +230,7 @@ christmas-workspace/
     - 연결 줄: 갈색 (#8B4513), 배너 오른쪽에서 썰매까지
   - **텍스트**:
     - 문구: "태은이 국시 합격 기원"
-    - 폰트: bold 14px Arial, sans-serif
+    - 폰트: bold 20px Arial, sans-serif
     - 색상: 빨간색 (COLORS.red)
     - 정렬: 가운데 정렬
   - **활성화 조건**:
